@@ -1632,7 +1632,12 @@ impl<T> SegmentingWatershed<T> {
     }
   }
 
-  fn transform_with_hook_and_colours(
+  /// Transform the image, with seeds labeled by colours.
+  ///
+  /// This differs from transform_with_hook in that you can specify nonconsecutive colours,
+  /// or multiple seeds with the same colour. Seeds with the color 0 will be treated as uncoloured,
+  /// which is equivalent to providing no seed at all.
+  pub fn transform_with_hook_and_colours(
     &self,
     input: nd::ArrayView2<u8>,
     seeds_with_colours: &[(usize, (usize, usize))],
