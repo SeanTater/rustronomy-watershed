@@ -1635,8 +1635,7 @@ impl<T> SegmentingWatershed<T> {
   fn transform_with_hook_and_colours(
     &self,
     input: nd::ArrayView2<u8>,
-    seeds: &[(usize, usize)],
-    colours: &[usize],
+    seeds_with_colours: &[(usize, (usize, usize))],
   ) -> Vec<T> {
     //(1a) make an image for holding the diffserent water colours
     let shape = if self.edge_correction {
@@ -1667,19 +1666,10 @@ impl<T> SegmentingWatershed<T> {
       input.reborrow()
     };
 
-    //(2) set "colours" for each of the starting points
-    // The colours should range from 1 to seeds.len()
-    assert_eq!(seeds.len(), colours.len());
-    let mut colours = colours.to_vec();
-    let seed_colours: Vec<_> =
-      colours.iter().zip(seeds.iter()).map(|(col, (x, z))| (*col, (*x, *z))).collect();
-
     //Colour the starting pixels
-    for (&idx, &col) in seeds.iter().zip(colours.iter()) {
-      output[idx] = col;
+    for (col, idx) in seeds_with_colours {
+      output[*idx] = *col;
     }
-    //Set the zeroth colour to UNCOLOURED!
-    colours.insert(UNCOLOURED, UNCOLOURED);
 
     #[cfg(feature = "debug")]
     println!("starting with {} lakes", colours.len());
@@ -1802,7 +1792,7 @@ impl<T> SegmentingWatershed<T> {
             self.max_water_level,
             input.view(),
             output.view(),
-            &seed_colours,
+            &seeds_with_colours,
           )))
         })
       })
@@ -1819,8 +1809,7 @@ impl<T> Watershed<T> for SegmentingWatershed<T> {
   ) -> Vec<T> {
     self.transform_with_hook_and_colours(
       input,
-      seeds,
-      &(1..=seeds.len()).into_iter().collect::<Vec<_>>(),
+      &seeds.iter().enumerate().map(|(c, s)| (c + 1, *s)).collect::<Vec<_>>(),
     )
   }
 
