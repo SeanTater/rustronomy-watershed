@@ -1677,7 +1677,7 @@ impl<T> SegmentingWatershed<T> {
     }
 
     #[cfg(feature = "debug")]
-    println!("starting with {} lakes", colours.len());
+    println!("starting with {} lakes", seeds_with_colours.len());
 
     //(3) set-up progress bar
     #[cfg(feature = "progress")]
